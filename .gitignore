@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# IDE and local tooling
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+
+# Secrets and personal config (never commit)
+.env
+.env.*
+!.env.example
+config/secrets.py
+config/personals.py
+config/questions.py
+secrets.py
+apikeys.py
+*.pem
+*.key
+credentials.json
+token.json
+
+# Runtime data and logs (keep folder structure via .gitkeep only)
+all excels/*
+!all excels/.gitkeep
+all resumes/**
+!all resumes/default/
+!all resumes/default/.gitkeep
+logs/*
+!logs/.gitkeep
+old/
+
+# Browser automation session artifacts
+chrome-profile/
+.uc/
+chromedriver*
+selenium-debug.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Chrome automation artifacts
+*.png
+!docs/assets/*.png

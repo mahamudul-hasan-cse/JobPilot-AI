@@ -1,0 +1,20 @@
+# JobPilot AI — Python dependencies
+# Author: Md. Mahamudul Hasan
+# Install: pip install -r requirements.txt
+# Python: 3.11+
+
+# --- Core automation (browser, UI, LinkedIn bot) ---
+undetected-chromedriver==3.5.5
+selenium==4.44.0
+PyAutoGUI==0.9.54
+
+# --- AI / ML (Gemini, OpenAI, DeepSeek) ---
+google-generativeai==0.8.6
+openai==2.41.0
+
+# --- Web framework (applied-jobs dashboard) ---
+Flask==3.1.3
+flask-cors==6.0.2
+
+# --- Utilities ---
+setuptools>=65.5.0

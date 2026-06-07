@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPilot AI — Applied Jobs</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f9fafb; color: #111; }
+        .container { max-width: 1280px; margin: 0 auto; }
+        h1 { margin-bottom: 4px; }
+        .subtitle { color: #555; margin-bottom: 20px; }
+        table { border-collapse: collapse; width: 100%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        th, td { border: 1px solid #e5e7eb; padding: 10px 12px; text-align: left; }
+        th { background: #f3f4f6; font-weight: 600; }
+        tr:nth-child(even) { background: #fafafa; }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .sl-column, .score-column, .applied-column { text-align: center; }
+        .score-high { color: #059669; font-weight: 600; }
+        .score-mid { color: #d97706; font-weight: 600; }
+        .score-low { color: #dc2626; font-weight: 600; }
+        .tick { color: #059669; font-weight: bold; }
+        .sort-button { background: none; border: none; cursor: pointer; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JobPilot AI</h1>
+        <p class="subtitle">Applied Jobs Dashboard — Md. Mahamudul Hasan</p>
+        <table id="jobsTable">
+            <thead>
+                <tr>
+                    <th class="sl-column">#</th>
+                    <th>Job Title</th>
+                    <th>Company</th>
+                    <th>HR Contact</th>
+                    <th>Relevance Score</th>
+                    <th>
+                        External Link
+                        <button class="sort-button" onclick="sortByExternalLink()" title="Sort">↕</button>
+                    </th>
+                    <th class="applied-column">Applied</th>
+                </tr>
+            </thead>
+            <tbody id="jobsBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let sortOrder = 'asc';
+        let jobsData = [];
+
+        function scoreClass(score) {
+            const n = parseInt(score, 10);
+            if (isNaN(n)) return '';
+            if (n >= 70) return 'score-high';
+            if (n >= 50) return 'score-mid';
+            return 'score-low';
+        }
+
+        function createTableRow(job, index) {
+            const row = document.createElement('tr');
+
+            const slCell = document.createElement('td');
+            slCell.textContent = index + 1;
+            slCell.className = 'sl-column';
+            row.appendChild(slCell);
+
+            const titleCell = document.createElement('td');
+            const titleLink = document.createElement('a');
+            titleLink.href = job.Job_Link;
+            titleLink.textContent = job.Title;
+            titleLink.target = '_blank';
+            titleCell.appendChild(titleLink);
+            row.appendChild(titleCell);
+
+            const companyCell = document.createElement('td');
+            companyCell.textContent = job.Company;
+            row.appendChild(companyCell);
+
+            const hrCell = document.createElement('td');
+            if (job.HR_Name && job.HR_Name !== 'Unknown') {
+                const hrLink = document.createElement('a');
+                hrLink.href = job.HR_Link;
+                hrLink.textContent = job.HR_Name;
+                hrLink.target = '_blank';
+                hrCell.appendChild(hrLink);
+            } else {
+                hrCell.textContent = 'N/A';
+            }
+            row.appendChild(hrCell);
+
+            const scoreCell = document.createElement('td');
+            scoreCell.className = 'score-column ' + scoreClass(job.Relevance_Score);
+            scoreCell.textContent = job.Relevance_Score || 'N/A';
+            row.appendChild(scoreCell);
+
+            const extCell = document.createElement('td');
+            const appliedCell = document.createElement('td');
+            appliedCell.className = 'applied-column';
+
+            if (job.External_Job_link === 'Easy Applied') {
+                extCell.textContent = 'Easy Applied';
+                appliedCell.innerHTML = '<span class="tick">✓</span>';
+            } else if (job.External_Job_link) {
+                const extLink = document.createElement('a');
+                extLink.href = job.External_Job_link;
+                extLink.textContent = 'External Link';
+                extLink.target = '_blank';
+                extLink.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch(`/applied-jobs/${job.Job_ID}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        if (response.ok) {
+                            appliedCell.innerHTML = '<span class="tick">✓</span>';
+                        }
+                    } catch (error) {
+                        console.error('Error updating applied date:', error);
+                    }
+                });
+                extCell.appendChild(extLink);
+                if (job.Date_Applied && job.Date_Applied !== 'Pending') {
+                    appliedCell.innerHTML = '<span class="tick">✓</span>';
+                }
+            } else {
+                extCell.textContent = 'N/A';
+            }
+            row.appendChild(extCell);
+            row.appendChild(appliedCell);
+            return row;
+        }
+
+        function sortByExternalLink() {
+            sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+            jobsData.sort((a, b) => {
+                const valueA = a.External_Job_link || '';
+                const valueB = b.External_Job_link || '';
+                return sortOrder === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+            });
+            const tbody = document.getElementById('jobsBody');
+            tbody.innerHTML = '';
+            jobsData.forEach((job, index) => tbody.appendChild(createTableRow(job, index)));
+        }
+
+        fetch('/applied-jobs')
+            .then(response => response.json())
+            .then(jobs => {
+                jobsData = jobs;
+                const tbody = document.getElementById('jobsBody');
+                jobs.forEach((job, index) => tbody.appendChild(createTableRow(job, index)));
+            })
+            .catch(error => console.error('Error loading jobs:', error));
+    </script>
+</body>
+</html>
